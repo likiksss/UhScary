@@ -1,0 +1,50 @@
+local player = game.Players.LocalPlayer
+local TextChatService = game:GetService("TextChatService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TeleportService = game:GetService("TeleportService")
+
+local chatEvent
+local textChannel
+
+-- Check for Legacy Chat System
+if TextChatService.ChatVersion == Enum.ChatVersion.LegacyChatService then
+    local chatEvents = ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents")
+    if chatEvents then
+        chatEvent = chatEvents:FindFirstChild("SayMessageRequest")
+    end
+else
+    -- Check for new TextChatService
+    local channels = TextChatService:WaitForChild("TextChannels", 5)
+    if channels then
+        textChannel = channels:FindFirstChild("RBXGeneral")
+    end
+end
+
+-- Fallback to direct chat if other methods fail
+local function sendChatMessage(message)
+    if chatEvent then
+        chatEvent:FireServer(message, "All")
+    elseif textChannel then
+        textChannel:SendAsync(message)
+    else
+        warn("No valid chat method found, attempting direct chat.")
+        game:GetService("Chat"):Chat(player.Character.Head, message, Enum.ChatColor.White)
+    end
+end
+
+if chatEvent or textChannel or game:GetService("Chat") then
+    player.Chatted:Connect(function(msg)
+        if msg:lower() == "uh" then
+            spawn(function()
+                while true do
+                    sendChatMessage("uhh uhh")
+                    wait(0.1)  -- Adjust wait time to avoid chat rate limits
+                end
+            end)
+            wait(2)  -- Let it spam for a short while before rejoining
+            TeleportService:Teleport(16157889388, player)
+        end
+    end)
+else
+    warn("Chat system not detected. This script may not work in this game.")
+end
