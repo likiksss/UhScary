@@ -1,0 +1,40 @@
+local player = game.Players.LocalPlayer
+local TextChatService = game:GetService("TextChatService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TeleportService = game:GetService("TeleportService")
+
+local chatEvent
+local textChannel
+
+if TextChatService.ChatVersion == Enum.ChatVersion.LegacyChatService then
+    local chatEvents = ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents")
+    if chatEvents then
+        chatEvent = chatEvents:FindFirstChild("SayMessageRequest")
+    end
+else
+    local channels = TextChatService:FindFirstChild("TextChannels")
+    if channels then
+        textChannel = channels:FindFirstChild("RBXGeneral")
+    end
+end
+
+if chatEvent or textChannel then
+    player.Chatted:Connect(function(msg)
+        if msg:lower() == "uh" then
+            spawn(function()
+                while true do
+                    if chatEvent then
+                        chatEvent:FireServer("uhh uhh", "All")
+                    elseif textChannel then
+                        textChannel:SendAsync("uhh uhh")
+                    end
+                    wait(0.1)  -- Adjust wait time to avoid chat rate limits
+                end
+            end)
+            wait(2)  -- Let it spam for a short while before rejoining
+            TeleportService:Teleport(16157889388, player)  -- Updated with your PlaceId
+        end
+    end)
+else
+    warn("Chat system not detected. This script may not work in this game.")
+end
